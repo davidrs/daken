@@ -4,7 +4,11 @@ var dirty = require('dirty');
 var app = express();
 var dbSearches = dirty('searches.db');
 var dbQueue = dirty('queue.db');
-var Twit = require('twit')
+var Twit = require('twit');
+
+var clone = require('clone');
+
+var API_BASE_URL = 'http://localhost:3000/';
 
 var T = new Twit({
     consumer_key:         'AKBd0aYWHQmKPgk9F0yCKA'
@@ -57,7 +61,7 @@ app.runSearches = function(){
 
 					  for(var i=0; i < badTweets.length;i++){
 					  	var checkQueue = dbQueue.get(badTweets[i].id_str);
-				  		if(!checkQueue){
+				  		if(!checkQueue && !badTweets[i].retweeted_status){
 				  			dbQueue.set(badTweets[i].id_str,
 						  	{	
 						  		badTweet:badTweets[i],
@@ -66,7 +70,7 @@ app.runSearches = function(){
 						  		status:'pending'
 						  	});
 				  		} else{
-				  			console.log('DUPLICATE key, already queued this tweet.');
+				  			console.log('DUPLICATE key or a RT.',badTweets[i].retweeted_status);
 				  		}			
 					  }
 					}
@@ -97,16 +101,30 @@ app.get('/', function(req, res){
 
 });
 
+app.approveResponse = function(id){
+	var response = dbQueue.get(id);
+
+	console.log("Approving this response:",response);
+
+	console.log("TODO: Uncomment when ready");
+
+	/*
+	T.post('statuses/update', { status: 'hello world!' }, function(err, data, response) {
+	  console.log('post',data);
+	});
+	*/
+
+}
 
 //Show entire queue
 app.get('/queue', function(req, res){
 	var response ={};
 
 	    dbQueue.forEach(function(key, val) {
-	    	val.badTweet = val.badTweet.text;
-	    	response[key] = val;
+	    	var resp = clone(val);
+	    	resp.badTweet = val.badTweet.text;
+	    	response[key] = resp;
 	    });
-
 	    console.log('Queue response' );
 
   res.send(JSON.stringify(response));
@@ -119,16 +137,16 @@ app.get('/queue/email/:email', function(req, res){
 
 	    dbQueue.forEach(function(key, val) {
 	    	if(val.email == req.params.email && val.status == 'pending'){
-		    	val.badTweet = val.badTweet.text;
-		    	val.approveLink = '/queue/'+key+'/approve';
-		    	val.rejectLink = '/queue/'+key+'/reject';
-		    	response[key] = val;
+	    		var resp = clone(val);
+	    		resp.badTweet = val.badTweet.text;
+			    resp.approveLink = API_BASE_URL+'queue/'+ key +'/approve',
+			    resp.rejectLink = API_BASE_URL+'queue/'+ key +'/reject'
+			    
+		    	response[key] = resp;
 	    	}
 	    });
-
 	    console.log('Queue response' );
-
-  res.send(JSON.stringify(response));
+  	res.send(JSON.stringify(response));
 });
 
 
@@ -142,11 +160,13 @@ app.get('/queue/:id/:status', function(req, res){
 		if(entry.status == 'pending'){
 			if(status == 'approve'){
 				console.log('TODO: approve');
+				app.approveResponse(id);
 			} else if(status == 'reject'){
 				console.log('TODO: rejected');
 
 			}
 		}
+  		res.send("Set status: "+status);
 
 	}else{
 		console.warn("No id match found.");
