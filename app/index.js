@@ -97,6 +97,8 @@ app.get('/', function(req, res){
 
 });
 
+
+//Show entire queue
 app.get('/queue', function(req, res){
 	var response ={};
 
@@ -111,6 +113,26 @@ app.get('/queue', function(req, res){
 });
 
 
+//Show queue for particular email address, that are pending.
+app.get('/queue/email/:email', function(req, res){
+	var response ={};
+
+	    dbQueue.forEach(function(key, val) {
+	    	if(val.email == req.params.email && val.status == 'pending'){
+		    	val.badTweet = val.badTweet.text;
+		    	val.approveLink = '/queue/'+key+'/approve';
+		    	val.rejectLink = '/queue/'+key+'/reject';
+		    	response[key] = val;
+	    	}
+	    });
+
+	    console.log('Queue response' );
+
+  res.send(JSON.stringify(response));
+});
+
+
+// Call to make actions.
 app.get('/queue/:id/:status', function(req, res){
 	var id =req.params.id;
 	var status = req.params.status;
