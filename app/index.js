@@ -10,6 +10,9 @@ var clone = require('clone');
 
 var API_BASE_URL = 'http://localhost:3000/';
 
+var port = process.env.PORT || 3000;
+app.set('port', process.env.PORT || 3000);
+
 var T = new Twit({
     consumer_key:         'AKBd0aYWHQmKPgk9F0yCKA'
   , consumer_secret:      'J82K9fXJEKN2Fjbj9cFgEOdgWH0mWe2IXtPdYxYDk8'
@@ -175,7 +178,7 @@ app.get('/queue/:id/:status', function(req, res){
 });
 
 
-app.listen(3000);
+app.listen(port);
 
 //Run the searches
 app.runSearches();
