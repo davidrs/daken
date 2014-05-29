@@ -3,33 +3,23 @@ var dirty = require('dirty');
 
 var app = express();
 
-var dbSearches = dirty('searches.db');
+app.dbSearches = dirty('searches.db');
 app.dbQueue = dirty('queue.db');
-app.config = {
-	API_BASE_URL: 'http://localhost:3000/',
-	TWEETS_PER_EMAIL: 10
-};
-
-var Twit = require('twit');
 
 var clone = require('clone');
 
 
 var port = process.env.PORT || 3000;
+require("./configure")(app);
 require("./routes")(app);
 require("./helpers")(app);
+app.configure();
 app.listen(port);
 
-var T = new Twit({
-    consumer_key:         'pzYm83EAARajUYxih4NbPH1Rb'
-  , consumer_secret:      'JE3uFgsOa33iawnzfHL0L5JWWVQflAy9vf9XiYhqXaHFOM1GbR'
-  , access_token:         '387245373-cEveoGrdv2OMNcdwvGOi4t066nzGywfzjZbxruRa'
-  , access_token_secret:  'UzL9ysHcJikDXbvgnM6o1SfkPa9Y6O7t0fxN9Bf9jembT'
-});
 
 
 app.runSearches = function(){
-    dbSearches.forEach(function(key, val) {
+    app.dbSearches.forEach(function(key, val) {
     	app.runSingleSearch(key,val);	    	
     });
 }
@@ -69,6 +59,15 @@ app.runSingleSearch = function(badWord, search){
 		}
 	);
 
+};
+
+app.getSearches = function(){
+	var response = {};
+    app.dbSearches.forEach(function(key, val) {
+    	var resp = clone(val);
+    	response[key] = resp;
+    });
+    return response;
 };
 
 app.getQueue = function(){
@@ -112,8 +111,9 @@ app.approveResponse = function(id){
 //Set new entries:
 app.setEntry = function(){
 	dbSearches.on('load', function() {
-	    dbSearches.set('gay', 
+	    app.dbSearches.set('gay', 
     	{
+    		cleanVersion: 'gay', //Gay is not always a bad word. Use cleanVersion for words like f*g
     		emails: ['sample1@gmail.com', 'sample2@gmail.com'],
     		emailIndex: 0,
     		comments:['Dakens first magical tweet',

@@ -22,6 +22,12 @@ module.exports = function (app) {
 		app.setEntry();
 	});
 
+	//Show all searches queue
+	app.get('/search', function(req, res){
+		var response = app.getSearches();
+	  	res.send(JSON.stringify(response));
+	});
+
 	//Show entire queue
 	app.get('/queue', function(req, res){
 		var response = app.getQueue();
