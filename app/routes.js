@@ -3,7 +3,6 @@ var clone = require('clone');
 
 module.exports = function (app) {
 
-
 	// Homepage doens't do anything.
 	app.get('/', function(req, res){
 		console.log("index page");
@@ -25,6 +24,8 @@ module.exports = function (app) {
 
 	//Show all searches queue
 	app.get('/search', function(req, res){
+		 res.header("Access-Control-Allow-Origin", "*");
+		res.header("Access-Control-Allow-Headers", "X-Requested-With");
 		var response = app.getSearches();
 	  	res.send(JSON.stringify(response));
 	});
