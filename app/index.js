@@ -110,15 +110,13 @@ app.approveResponse = function(id){
 
 //Set new entries:
 app.setEntry = function(){
-	app.dbSearches.on('load', function() {
-	    app.dbSearches.set('gay', 
-    	{
-    		cleanVersion: 'gay', //Gay is not always a bad word. Use cleanVersion for words like f*g
-    		emails: ['sample1@gmail.com', 'sample2@gmail.com'],
-    		emailIndex: 0,
-    		comments:['Dakens first magical tweet',
-    					'Some other tweet',
-    					'A third kind of tweet']
-    	});
+    app.dbSearches.set('gay', 
+	{
+		cleanVersion: 'gay', //Gay is not always a bad word. Use cleanVersion for words like f*g
+		emails: ['sample1@gmail.com', 'sample2@gmail.com'],
+		emailIndex: 0,
+		comments:['Dakens first magical tweet',
+					'Some other tweet',
+					'A third kind of tweet']
 	});
 };
