@@ -20,6 +20,7 @@ module.exports = function (app) {
 	//Create a new entry.
 	app.get('/set', function(req, res){
 		app.setEntry();
+	  	res.send('set');
 	});
 
 	//Show all searches queue
