@@ -18,7 +18,7 @@ module.exports = function (app) {
 	});
 
 	//Create a new entry.
-	app.get('/set/', function(req, res){
+	app.get('/set', function(req, res){
 		app.setEntry();
 	});
 

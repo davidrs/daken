@@ -88,7 +88,7 @@ app.randomComment = function(val){
 
 app.incrementEmailIndex = function(key, val){
 	val.emailIndex = (val.emailIndex + 1) % val.emails.length;
-	dbSearches.set(key, val);
+	app.dbSearches.set(key, val);
 };
 
 
@@ -110,7 +110,7 @@ app.approveResponse = function(id){
 
 //Set new entries:
 app.setEntry = function(){
-	dbSearches.on('load', function() {
+	app.dbSearches.on('load', function() {
 	    app.dbSearches.set('gay', 
     	{
     		cleanVersion: 'gay', //Gay is not always a bad word. Use cleanVersion for words like f*g
