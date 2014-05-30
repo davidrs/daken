@@ -112,6 +112,7 @@ app.approveResponse = function(id){
 app.setEntry = function(){
     app.dbSearches.set('gay', 
 	{
+		word:'gay', //duplicate of key, just so we have it easily accesible
 		cleanVersion: 'gay', //Gay is not always a bad word. Use cleanVersion for words like f*g
 		emails: ['sample1@gmail.com', 'sample2@gmail.com'],
 		emailIndex: 0,
