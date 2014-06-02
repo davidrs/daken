@@ -5,7 +5,7 @@ module.exports = function (app) {
 	app.configure = function(){
 		app.config = {
 			API_BASE_URL: 'http://localhost:3000/',
-			TWEETS_PER_EMAIL: 10
+			TWEETS_PER_EMAIL: 15
 		};
 		app.T = new Twit({
 		    consumer_key:         'pzYm83EAARajUYxih4NbPH1Rb'
