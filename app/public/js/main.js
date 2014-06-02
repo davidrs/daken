@@ -1,5 +1,5 @@
-//var BASE_API_URL = 'http://warm-citadel-2025.herokuapp.com';
-var BASE_API_URL = 'http://localhost:3000';
+var BASE_API_URL = 'http://warm-citadel-2025.herokuapp.com';
+//var BASE_API_URL = 'http://localhost:3000';
 var BASE_CLIENT_URL = 'http://localhost:3000';
 var MIN_TWEETS = 5;
 
