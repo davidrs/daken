@@ -1,9 +1,20 @@
-var express = require('express');
-var dirty = require('dirty');
-var md5 = require('MD5');
+var express = require('express'),
+	dirty = require('dirty'),
+	md5 = require('MD5'),
+	mongo = require("mongodb"),
+	url = require("url");
+
+// Heroku-style environment variables
+var uristring = process.env.MONGOLAB_URI || "mongodb://localhost/testdatabase";
+var mongoUrl = url.parse (uristring);
+
 
 var app = express();
 
+// Pointer to mongo db
+app.db = null;
+
+//Dirty DB
 app.dbSearches = dirty('searches.db');
 app.dbQueue = dirty('queue.db');
 
@@ -18,8 +29,24 @@ app.configure();
 app.listen(port);
 
 
+//TODO read tutorial: http://mongodb.github.io/node-mongodb-native/api-articles/nodekoarticle1.html
+// Retrieve
+var MongoClient = mongo.MongoClient;
+
+// Connect to the db
+MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, scopedDB) {
+  if(!err) {
+    console.log("We are connected");
+    app.db = scopedDB;
+  } else{
+  	console.log('err');
+  }
+});
+
+
 
 app.runSearches = function(){
+
     app.dbSearches.forEach(function(key, val) {
     	app.runSingleSearch(key,val);	    	
     });
@@ -70,13 +97,15 @@ app.authorizeUser = function(pwd){
 	return (md5(pwd) == 'a37821efe50a564f7dad395ad6b036bc');
 };
 
-app.getSearches = function(){
+//TODO in process of migration to mongo
+// Read: http://coenraets.org/blog/2012/10/creating-a-rest-api-using-node-js-express-and-mongodb/
+app.getSearches = function(res){
 	var response = {};
-    app.dbSearches.forEach(function(key, val) {
-    	var resp = clone(val);
-    	response[key] = resp;
+	app.db.collection('searches', function(er, collection) {
+		collection.find().toArray(function(err, items) {
+            res.send(items);
+        });
     });
-    return response;
 };
 
 app.getQueue = function(filter){
@@ -147,8 +176,7 @@ app.rejectResponse = function(id){
 
 //Set new entries:
 app.setEntry = function(){
-    app.dbSearches.set('gay', 
-	{
+	var searchObj = {
 		word:'gay', //duplicate of key, just so we have it easily accesible
 		cleanWord: 'gay', //Gay is not always a bad word. Use cleanVersion for words like f*g
 		emails: ['sample1@gmail.com', 'sample2@gmail.com'],
@@ -156,5 +184,13 @@ app.setEntry = function(){
 		comments:['Dakens first magical tweet',
 					'Some other tweet',
 					'A third kind of tweet']
-	});
+	};
+	// npm DirtyDB:
+    // app.dbSearches.set(searchObj.word, searchObj);
+
+	app.db.collection('searches', function(er, collection) {
+		var key = searchObj.word;
+    	collection.insert({key : searchObj}, {safe: true}, function(er,rs) {
+    	});
+    });
 };

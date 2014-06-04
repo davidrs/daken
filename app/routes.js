@@ -37,8 +37,7 @@ module.exports = function (app) {
 	app.get('/search', function(req, res){
 		res.header("Access-Control-Allow-Origin", "*");
 		res.header("Access-Control-Allow-Headers", "X-Requested-With");
-		var response = app.getSearches();
-	  	res.send(JSON.stringify(response));
+		app.getSearches(res);
 	});
 
 
