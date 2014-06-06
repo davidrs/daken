@@ -49,7 +49,7 @@ MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, scopedD
 	});
 
   } else{
-  	console.log('err');
+  	console.log('err', err);
   }
 });
 
