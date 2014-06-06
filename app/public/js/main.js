@@ -1,5 +1,5 @@
-var BASE_API_URL = 'http://warm-citadel-2025.herokuapp.com';
-//var BASE_API_URL = 'http://localhost:3000';
+//var BASE_API_URL = 'http://warm-citadel-2025.herokuapp.com';
+var BASE_API_URL = 'http://localhost:3000';
 var BASE_CLIENT_URL = 'http://localhost:3000';
 var MIN_TWEETS = 5;
 
@@ -92,7 +92,7 @@ var app = {
 		$.post(BASE_API_URL+'/queue',
 			filter).done(
 			function(queue){
-				var queue = JSON.parse(queue);
+				//var queue = JSON.parse(queue);
 				console.log('queue',queue);
 
 				app.runMoreIfNeeded(queue);
@@ -110,7 +110,8 @@ var app = {
 
 			for(var counter = 0; counter < queue.length; counter++){
 
-				entry = queue[counter]
+				entry = queue[counter];
+				entry.id = entry._id;
 				row.append(_.template(template, entry));
 
 				// Add new row div if needed.
