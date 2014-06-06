@@ -53,9 +53,7 @@ module.exports = function (app) {
 
 			body = qs.parse(body);
 		  	console.log('Get Queue, filter: ', body);
-			var response = app.getQueue(body);
-
-		  	res.send(JSON.stringify(response));
+			app.getQueue(body, res);
 		});
 	});
 
@@ -64,28 +62,29 @@ module.exports = function (app) {
 	app.get('/queue/:id/:status', function(req, res){
 		res.header("Access-Control-Allow-Origin", "*");
 		res.header("Access-Control-Allow-Headers", "X-Requested-With");
-
-		var id =req.params.id;
-		var status = req.params.status;
-
-		var entry = app.dbQueue.get(id);
-		if(entry){
-
-			// Che4ck pending to stop duplicates.
-			if(entry.status == 'pending'){
-				if(status == 'approve'){
-					console.log('approve');
-					app.approveResponse(id);
-				} else if(status == 'reject'){
-					console.log('TODO: rejected');
-					app.rejectResponse(id);
-				}
-			}
-
-		} else{
-			console.warn("No id match found.");
+		var id = req.params.id;
+		var filter= {
+			_id: id,
+			status:req.params.status 
 		}
 
-		res.send({status: status});
+		app.tweetsCollection.findOne(filter, function(err, entry){
+			if(entry){
+				// Check pending to stop duplicates.
+				if(entry.status == 'pending'){
+					if(status == 'approve'){
+						console.log('approve');
+						app.approveResponse(id);
+					} else if(status == 'reject'){
+						console.log('TODO: rejected');
+						app.rejectResponse(id);
+					}
+				}
+
+			} else{
+				console.warn("No id match found.");
+			}
+			res.send({status: status});
+		});
 	});
 };

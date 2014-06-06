@@ -1,12 +1,13 @@
+ <% console.log("xx"); %>
 <div class="col-md-4">
   <p><strong>Tweet:</strong> <%= badTweet.text %></p>
   <p><strong>Date: </strong> <%= badTweet.created_at %></p>
   <p><strong>Response:</strong> <%= response %></p>
   <a href="http://twitter.com/<%=badTweet.user.id_str %>/status/<%=badTweet.id_str%>" target="_blank" class="btn btn-sm btn-info" >Original Tweet</a>
   <% if(status == "pending"){ %>
-	  <a class="btn btn-sm btn-success approve"  role="button" data-id="<%= id %>">Send Reply</a>
-	  <a class="btn btn-sm btn-danger reject" role="button" data-id="<%= id %>">Ignore</a>
+	  <a class="btn btn-sm btn-success approve"  role="button" data-id="<%= _id %>">Send Reply</a>
+	  <a class="btn btn-sm btn-danger reject" role="button" data-id="<%= _id %>">Ignore</a>
   <% } else if (status == "pending"){ %>
-  	 <a class="btn btn-danger" href="#" role="button" data-id="<%= id %>">Rejected</a>
+  	 <a class="btn btn-danger" href="#" role="button" data-id="<%= _id %>">Rejected</a>
   <% } %>
 </div>
