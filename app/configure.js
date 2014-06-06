@@ -8,10 +8,10 @@ module.exports = function (app) {
 			TWEETS_PER_EMAIL: 15
 		};
 		app.T = new Twit({
-		    consumer_key:         'pzYm83EAARajUYxih4NbPH1Rb'
-		  , consumer_secret:      'JE3uFgsOa33iawnzfHL0L5JWWVQflAy9vf9XiYhqXaHFOM1GbR'
-		  , access_token:         '387245373-cEveoGrdv2OMNcdwvGOi4t066nzGywfzjZbxruRa'
-		  , access_token_secret:  'UzL9ysHcJikDXbvgnM6o1SfkPa9Y6O7t0fxN9Bf9jembT'
+		    consumer_key:         'GsaQ0j9nLg2uImZhjEj7KmWCu'
+		  , consumer_secret:      'b2QFKJjsSVaIp6CarFy2gk6WXC7DXd9xHRqaiF4LKKz4ELztSQ'
+		  , access_token:         '2528590494-aAKpuyEdEcGKyLXghfEgeGLNO96TStBk7Qmte82'
+		  , access_token_secret:  'ehuek6S2wbjJh3YM1TFcVTDDXOTZhOlS1XhZI9rX94TJG'
 		});
 	};	
 };
