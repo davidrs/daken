@@ -6,7 +6,7 @@ var express = require('express'),
 
 // Heroku-style environment variables
 var uristring = process.env.MONGOLAB_URI || "mongodb://localhost/testdatabase";
-var mongoUrl = url.parse (uristring);
+//var mongoUrl = url.parse (uristring);
 
 
 var app = express();
@@ -35,7 +35,7 @@ var MongoClient = mongo.MongoClient;
 
 // Connect to the db
 console.info("Starting Mongo Connection");
-MongoClient.connect(mongoUrl, function(err, scopedDB) {
+MongoClient.connect(uristring, function(err, scopedDB) {
   if(!err) {
     console.log("We are connected");
     app.db = scopedDB;
