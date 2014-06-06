@@ -6,7 +6,7 @@ var express = require('express'),
 
 // Heroku-style environment variables
 var uristring = process.env.MONGOLAB_URI || "mongodb://localhost/testdatabase";
-var mongoUrl = url.parse (uristring);
+//var mongoUrl = url.parse (uristring);
 
 
 var app = express();
@@ -34,7 +34,8 @@ var emptyCallback = function(err, data){};
 var MongoClient = mongo.MongoClient;
 
 // Connect to the db
-MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, scopedDB) {
+console.info("Starting Mongo Connection");
+MongoClient.connect(uristring, function(err, scopedDB) {
   if(!err) {
     console.log("We are connected");
     app.db = scopedDB;
@@ -49,7 +50,7 @@ MongoClient.connect("mongodb://localhost:27017/exampleDb", function(err, scopedD
 	});
 
   } else{
-  	console.log('err');
+  	console.log('err', err);
   }
 });
 

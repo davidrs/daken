@@ -1,6 +1,7 @@
-//var BASE_API_URL = 'http://warm-citadel-2025.herokuapp.com';
-var BASE_API_URL = 'http://localhost:3000';
-var BASE_CLIENT_URL = 'http://localhost:3000';
+var BASE_API_URL = 'http://warm-citadel-2025.herokuapp.com';
+if (document.location.hostname == "localhost"){
+	BASE_CLIENT_URL = 'http://localhost:3000';
+}
 var MIN_TWEETS = 5;
 
 var User = {email:'davidrustsmith@gmail.com', auth: false, password:''};
