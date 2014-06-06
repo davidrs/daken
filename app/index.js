@@ -5,6 +5,7 @@ var express = require('express'),
 	url = require("url");
 
 // Heroku-style environment variables
+console.log("PROCESS ENV",process.env);
 var uristring = process.env.MONGOLAB_URI || "mongodb://localhost/testdatabase";
 var mongoUrl = url.parse (uristring);
 
