@@ -87,7 +87,8 @@ var app = {
 	getQueue: function(word){
 		var filter = {word: word};
 		if(! User.auth){
-			filter.status = "approved";
+			// Decided to show unnapproved to everyone. Allows for guests to reply directly themselves.
+			//filter.status = "approved";
 		} 
 
 		$.post(BASE_API_URL+'/queue',
