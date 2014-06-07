@@ -8,10 +8,10 @@ module.exports = function (app) {
 			TWEETS_PER_EMAIL: 10
 		};
 		app.T = new Twit({
-		    consumer_key:         'XXX'
-		  , consumer_secret:      'XXX'
-		  , access_token:         'XXX'
-		  , access_token_secret:  'XXX'
+		    consumer_key:         'XXX',
+		    consumer_secret:      'XXX',
+		    access_token:         'XXX',
+		    access_token_secret:  'XXX'
 		});
 	};	
 };

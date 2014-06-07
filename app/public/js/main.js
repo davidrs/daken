@@ -1,6 +1,6 @@
 var BASE_API_URL = 'http://warm-citadel-2025.herokuapp.com';
 if (document.location.hostname == "localhost"){
-	BASE_CLIENT_URL = 'http://localhost:3000';
+	BASE_API_URL = 'http://localhost:3000';
 }
 var MIN_TWEETS = 5;
 
@@ -92,7 +92,7 @@ var app = {
 		} 
 
 		$.post(BASE_API_URL+'/queue',
-			filter).done(
+			JSON.stringify(filter)).done(
 			function(queue){
 				//var queue = JSON.parse(queue);
 				console.log('queue',queue);
@@ -117,7 +117,7 @@ var app = {
 				row.append(_.template(template, entry));
 
 				// Add new row div if needed.
-				if((counter + 1) % 3 == 0){
+				if((counter + 1) % 3 === 0){
 					$('#queue').append(row);
 					$('#queue').append('<hr />');
 					row = $('<div class="row"></div>');		
@@ -125,7 +125,7 @@ var app = {
 			}
 
 			// Add last row we were building.
-			if(counter % 3 != 0){
+			if(counter % 3 !== 0){
 				$('#queue').append(row);
 			}	
 
@@ -151,7 +151,7 @@ var app = {
 			var parentBox = $(this).closest('.col-md-4');
 			$.get(BASE_API_URL + '/queue/'+ id +"/reject", function(data){
 				console.log('rejected ',data);
-				console.log(parentBox)
+				console.log(parentBox);
 				parentBox.fadeOut(600, function() { $(this).remove(); });
 			});
 			evt.preventDefault();

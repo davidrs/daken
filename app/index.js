@@ -12,10 +12,10 @@ var uristring = process.env.MONGOLAB_URI || "mongodb://localhost/testdatabase";
 var app = express();
 
 // Pointer to mongo db
-app.db = null;
+app.db = null; 
 
 //Mongo Collections
-app.searchCollection = null
+app.searchCollection = null;
 app.tweetCollection = null;
 
 var clone = require('clone');
@@ -71,9 +71,9 @@ app.runSearches = function(){
 		items.forEach(function(val, key){
 			console.log('values',val,key);
 			app.runSingleSearch(val);	
-		})
+		});
     });
-}
+};
 
 
 app.runSingleSearch = function(search){
@@ -137,8 +137,9 @@ app.getQueue = function(filter, res){
 	var response = [];
     app.tweetCollection.find().toArray(function(err, items) {
     	var response = [];
-    	items.forEach(function(val, key) {
-    	
+    	console.log("found Tweets: "+items.length);
+
+    	items.forEach(function(val, key) {    	
 	    	var allFilterMatch = true;
 	    	for ( var prop in filter ){
 	    		if(filter[prop] != val[prop]){
@@ -197,7 +198,7 @@ app.approveResponse = function(id){
 		}
 	});
 
-}
+};
 
 app.rejectResponse = function(id){
 	console.log("Rejecting response ",id);
@@ -246,7 +247,7 @@ app.randomComment = function(val){
 app.prepareResponse = function(userName, response){
 	// If there is !name in response replace with user's name, else append users name to begining.
 	if(response.indexOf('!name')>=0){
-		response = response.replace('!name', '@'+userName)
+		response = response.replace('!name', '@'+userName);
 	} else{
 		response = '.@' + userName+ ' ' + response;
 	}

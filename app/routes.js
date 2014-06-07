@@ -50,8 +50,8 @@ module.exports = function (app) {
 		    body += chunk;
 		});
 		req.on('end', function () {
-
-			body = qs.parse(body);
+			//TODO: see if/why qs. parse was necessary...
+			body = JSON.parse(body);//qs.parse(body);
 		  	console.log('Get Queue, filter: ', body);
 			app.getQueue(body, res);
 		});
@@ -63,10 +63,10 @@ module.exports = function (app) {
 		res.header("Access-Control-Allow-Origin", "*");
 		res.header("Access-Control-Allow-Headers", "X-Requested-With");
 		var id = req.params.id;
-		var filter= {
+		var filter = {
 			_id: id,
 			status:req.params.status 
-		}
+		};
 
 		app.tweetsCollection.findOne(filter, function(err, entry){
 			if(entry){
