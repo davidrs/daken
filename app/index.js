@@ -239,13 +239,13 @@ app.approveResponse = function(id){
 			var userName = entry.badTweet.user.screen_name;
 			var statusUpdate = app.prepareResponse(userName, entry.response);
 
-			console.log("TODO: Uncomment to send ", statusUpdate);
+			//console.log("TODO: Uncomment to send ", statusUpdate);
 			// TODO figure out how to 'reply' to a tweet.
 			
-			// app.T.post('statuses/update', { status: statusUpdate }, function(err, data, response) {
-			//    console.log('err ',err);
-			//    console.log('post ',data);
-			// });	
+			app.T.post('statuses/update', { status: statusUpdate }, function(err, data, response) {
+			   console.log('err ',err);
+			   console.log('post ',data);
+			});	
 
 
 			app.tweetCollection.update({_id: id}, 

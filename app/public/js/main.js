@@ -192,12 +192,14 @@ var app = {
 		$('.approve').click(function(evt){
 			var id = $(this).data('id');
 			var parentBox = $(this).closest('.col-md-4');
-			$.getJSON(BASE_API_URL + '/queue/'+ id +"/approve",function(data){
-				console.log('approved ',data);
-				console.log(parentBox.find('.pending-actions').length);
-				parentBox.find('.pending-actions').hide();
-				parentBox.addClass("bg-success");
-			});
+			if(User.auth){
+				$.getJSON(BASE_API_URL + '/queue/'+ id +"/approve",function(data){
+					console.log('approved ',data);
+					console.log(parentBox.find('.pending-actions').length);
+					parentBox.find('.pending-actions').hide();
+					parentBox.addClass("bg-success");
+				});
+			}
 			evt.preventDefault();
 		});
 
@@ -205,11 +207,13 @@ var app = {
 			var id = $(this).data('id');
 			console.log('click ',id);
 			var parentBox = $(this).closest('.col-md-4');
-			$.get(BASE_API_URL + '/queue/'+ id +"/reject", function(data){
-				console.log('rejected ',data);
-				console.log(parentBox);
-				parentBox.fadeOut(600, function() { $(this).remove(); });
-			});
+			if(User.auth){
+				$.get(BASE_API_URL + '/queue/'+ id +"/reject", function(data){
+					console.log('rejected ',data);
+					console.log(parentBox);
+					parentBox.fadeOut(600, function() { $(this).remove(); });
+				});
+			}
 			evt.preventDefault();
 		});
 	},
