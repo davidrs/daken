@@ -165,6 +165,7 @@ var app = {
 
 				entry = queue[counter];
 				entry.id = entry._id;
+				entry.auth = User.auth;
 				row.append(_.template(template, entry));
 
 				// Add new row div if needed.
