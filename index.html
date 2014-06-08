@@ -58,7 +58,7 @@
           <a class="navbar-brand" href="#">Daken</a>
         </div>
         <div class="navbar-collapse collapse">
-          <form class="navbar-form navbar-right" role="form"  id="login-section">
+          <form class="navbar-form navbar-right" role="form" id="login-form">
             <div class="form-group">
               <input type="text" placeholder="Email" class="form-control" id="email-account">
             </div>
@@ -67,46 +67,25 @@
             </div>
             <button type="submit" class="btn btn-success" id="login">Sign in</button>
           </form>
-          <form class="navbar-form navbar-right" id="logout-section" role="form" style="display:none;">
-            <div class="active-user pull-left" style="color:#eee;font-size:1.2em;margin:5px;">
-            </div>
-            <button class="btn btn-warning logout pull-right" type="submit" >Logout</button>
-          </form>
         </div><!--/.navbar-collapse -->
       </div>
     </div>
 
     <!-- Main jumbotron for a primary marketing message or call to action -->
-    <div class="jumbotron" id="intro">
-      <div class="container" >
+    <div class="jumbotron">
+      <div class="container" id="intro">
         <h1>Daken wants to spread love!</h1>
-        <p>Twitter is filled with lots of hateful language, our theory: knowledge, humour and love <strong>trumps</strong> hate</p>
-        <p><small>Warning: This site contains Tweets with offensive language and occasionally disturbing content.<br />
-        We belive in everyone's freedom of speech, we just want to inform.</small></p>
-        
-        <p>
-          <!-- <a class="btn btn-info btn-lg" role="button" href="#">Read More</a> -->          
-          <a class="btn btn-primary btn-lg" role="button" href="https://twitter.com/DakenBud" target="_blank">Twitter Account</a>
-        </p>
+        <p>Daken is a Twitter robot, follow her here: @DakenBud </p>
+        <p>Warning: This site contains Tweets with offensive language and occasionally disturbing content.</p>
+        <p><a class="btn btn-primary btn-lg" role="button" href="https://twitter.com/DakenBud" target="_blank">Twitter Account &raquo;</a></p>
+      </div>
+      <div class="container" id="search-container" style="display:none;">
+        <p class="search-word"></p>
+        <p><a class="btn btn-primary btn-lg back" role="button">Back &raquo;</a></p>
       </div>      
-    </div>   
+    </div>
 
     <div class="container">
-      <div class="row well " id="search-container" style="display:none;">
-          <h3>word: <span class="search-word"></span></h3>
-          <div  class="col-md-6">
-            <div class="form-group">
-              <label for="submit-response">Suggest a Tweet, <small>positive, constructive, and funny is best.<br />!name will be replaced with user's @twitterhandle otherwise handle goes at the begining.</small></label>
-              <textarea class="form-control" id="submit-response" rows="2"></textarea>    
-            </div>  
-              <div class="form-group "> 
-                <a class="btn btn-success  btn-response" role="button">Submit</a>
-                <a class="btn btn-primary back" role="button">Back Home&raquo;</a>
-              </div>  
-          </div>           
-      </div> 
-
-
       <div class="row" id="searches">
       </div>
 

@@ -1,11 +1,11 @@
 var BASE_API_URL = 'http://warm-citadel-2025.herokuapp.com';
 if (document.location.hostname == "localhost"){
-	BASE_CLIENT_URL = 'http://localhost:3000';
+	BASE_API_URL = 'http://localhost:3000';
 }
 var MIN_TWEETS = 5;
 
 var User = {email:'davidrustsmith@gmail.com', auth: false, password:''};
-//var currentWord ='';
+var currentWord ='';
 
 requirejs.config({
     paths: {
@@ -32,6 +32,56 @@ var app = {
 			}
 			evt.preventDefault();
 		});
+
+		$('.logout').click(function(evt){
+			evt.preventDefault();
+			
+			User.email = '';
+			User.password = '';
+			User.auth = false;
+
+			if(localStorage){
+				localStorage.setItem("email", '');
+				localStorage.setItem("password", '');
+			}
+
+			$('#login-section').show();
+			$('#logout-section').hide();
+		});
+
+		$('.btn-response').click(function(evt){
+			console.log("click");
+			var response = $('#submit-response').val();
+			console.log(response);
+			if(response.length<1){
+				alert("Missing response text.");
+			} else{
+				app.suggestResponse(response);
+				var div =$('#submit-response');	
+				div.animate({height:'+=30px',opacity:'0.4'},"slow");
+				div.val('');
+				div.animate({height:'-=30px',opacity:'1'},"slow");
+			}		
+			evt.preventDefault();
+		});
+
+
+	},
+
+	suggestResponse: function(response){		
+		var filter = {
+			word: currentWord,
+			response: response,
+			auth: User.auth
+		};
+
+		$.post(BASE_API_URL+'/queue/submit',
+			JSON.stringify(filter)).done(
+			function(queue){
+				if(!User.auth){
+					alert("Thank you! Response will be moderated and then added to Daken's repertoire.")
+				}
+			});			
 	},
 
 	loadSettings: function(){
@@ -50,7 +100,8 @@ var app = {
 			console.log('ran auth',data);
 			User.auth = data.auth;
 			if(User.auth){
-				$('#login-form').hide();
+				$('#login-section').hide();
+				$('#logout-section').show();
 			}
 		});
 	},
@@ -65,9 +116,9 @@ var app = {
 
 				// add listeners to click to load queue for each search. use data-word
 				$('a.search').click(function(evt){
-					var word = $(this).data('word');
-					var cleanWord = $(this).data('cleanWord');
-					app.getQueue(word);
+					currentWord = $(this).data('word');
+					var cleanWord = $(this).data('cleanword');
+					app.getQueue(currentWord);
 
 					$('#intro').hide();
 					$('#search-container .search-word').text(cleanWord);
@@ -87,11 +138,12 @@ var app = {
 	getQueue: function(word){
 		var filter = {word: word};
 		if(! User.auth){
-			filter.status = "approved";
+			// Decided to show unnapproved to everyone. Allows for guests to reply directly themselves.
+			//filter.status = "approved";
 		} 
 
 		$.post(BASE_API_URL+'/queue',
-			filter).done(
+			JSON.stringify(filter)).done(
 			function(queue){
 				//var queue = JSON.parse(queue);
 				console.log('queue',queue);
@@ -116,7 +168,7 @@ var app = {
 				row.append(_.template(template, entry));
 
 				// Add new row div if needed.
-				if((counter + 1) % 3 == 0){
+				if((counter + 1) % 3 === 0){
 					$('#queue').append(row);
 					$('#queue').append('<hr />');
 					row = $('<div class="row"></div>');		
@@ -124,7 +176,7 @@ var app = {
 			}
 
 			// Add last row we were building.
-			if(counter % 3 != 0){
+			if(counter % 3 !== 0){
 				$('#queue').append(row);
 			}	
 
@@ -138,8 +190,12 @@ var app = {
 	addQueueListeners: function(){
 		$('.approve').click(function(evt){
 			var id = $(this).data('id');
+			var parentBox = $(this).closest('.col-md-4');
 			$.getJSON(BASE_API_URL + '/queue/'+ id +"/approve",function(data){
 				console.log('approved ',data);
+				console.log(parentBox.find('.pending-actions').length);
+				parentBox.find('.pending-actions').hide();
+				parentBox.addClass("bg-success");
 			});
 			evt.preventDefault();
 		});
@@ -150,7 +206,7 @@ var app = {
 			var parentBox = $(this).closest('.col-md-4');
 			$.get(BASE_API_URL + '/queue/'+ id +"/reject", function(data){
 				console.log('rejected ',data);
-				console.log(parentBox)
+				console.log(parentBox);
 				parentBox.fadeOut(600, function() { $(this).remove(); });
 			});
 			evt.preventDefault();
