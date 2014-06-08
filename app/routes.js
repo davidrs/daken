@@ -1,6 +1,9 @@
 
 var clone = require('clone');
-var qs = require('querystring');
+var qs = require('querystring'),
+	mongo = require("mongodb");
+
+var BSON = mongo.BSONPure;
 
 module.exports = function (app) {
 
@@ -41,6 +44,15 @@ module.exports = function (app) {
 	});
 
 
+
+	// Show queue
+	app.get('/queue', function(req, res){		
+		res.header("Access-Control-Allow-Origin", "*");
+		res.header("Access-Control-Allow-Headers", "X-Requested-With");		
+		//TODO: see if/why qs. parse was necessary...
+		app.getQueue({}, res);
+	});
+
 	// Show queue
 	app.post('/queue', function(req, res){		
 		res.header("Access-Control-Allow-Origin", "*");
@@ -57,34 +69,54 @@ module.exports = function (app) {
 		});
 	});
 
-
-	// Call to make actions.
-	app.get('/queue/:id/:status', function(req, res){
+// Show queue
+	app.post('/queue/submit', function(req, res){		
 		res.header("Access-Control-Allow-Origin", "*");
 		res.header("Access-Control-Allow-Headers", "X-Requested-With");
-		var id = req.params.id;
-		var filter = {
-			_id: id,
-			status:req.params.status 
+		var body = '';
+		req.on('data', function (chunk) {
+		    body += chunk;
+		});
+		req.on('end', function () {
+
+			body = JSON.parse(body);
+		  	console.log('Submit Response: ', body);
+			app.submitResponse(body, res);
+		});
+	});	
+
+
+	// Call to make actions.
+	app.get('/queue/:id/:action', function(req, res){
+		res.header("Access-Control-Allow-Origin", "*");
+		res.header("Access-Control-Allow-Headers", "X-Requested-With");
+		//console.log(req.params);
+		var id = BSON.ObjectID(req.params.id);
+		var action = req.params.action ;
+		var filter =
+            {
+             _id: id,
+            status: 'pending' 
 		};
 
-		app.tweetsCollection.findOne(filter, function(err, entry){
-			if(entry){
-				// Check pending to stop duplicates.
-				if(entry.status == 'pending'){
-					if(status == 'approve'){
+		if(id && action){
+			app.tweetCollection.findOne(filter, function(err, entry){
+				if(entry){					
+					if(action == 'approve'){
 						console.log('approve');
 						app.approveResponse(id);
-					} else if(status == 'reject'){
-						console.log('TODO: rejected');
-						app.rejectResponse(id);
+					} else if(action == 'reject'){
+						console.log('reject');
+						app.rejectResponse(id);					
 					}
+					res.send({status: action});
+				} else{
+					console.warn("No match found.",err);
+					res.send({status: 'pending'});
 				}
-
-			} else{
-				console.warn("No id match found.");
-			}
-			res.send({status: status});
-		});
+			});
+		} else{
+			res.send({status: 'pending'});
+		}
 	});
 };

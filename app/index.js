@@ -2,7 +2,8 @@ var express = require('express'),
 	dirty = require('dirty'),
 	md5 = require('MD5'),
 	mongo = require("mongodb"),
-	url = require("url");
+	url = require("url"),
+ 	BSON = mongo.BSONPure;
 
 // Heroku-style environment variables
 var uristring = process.env.MONGOLAB_URI || "mongodb://localhost/testdatabase";
@@ -11,6 +12,9 @@ var uristring = process.env.MONGOLAB_URI || "mongodb://localhost/testdatabase";
 
 var app = express();
 
+//TODO: Create queue object and search object.
+var Tweets = {};
+var Search = {};
 // Pointer to mongo db
 app.db = null; 
 
@@ -42,11 +46,16 @@ MongoClient.connect(uristring, function(err, scopedDB) {
 
 	app.db.collection('searches', function(er, collection) {
     	app.searchCollection = collection;
-    	//app.test();
+    	app.test();
 	});
 
 	app.db.collection('tweets', function(er, collection) {
     	app.tweetCollection = collection;
+		
+		//app.tweetCollection.drop() ;
+
+    	app.updateTweets();
+
 	});
 
   } else{
@@ -54,22 +63,71 @@ MongoClient.connect(uristring, function(err, scopedDB) {
   }
 });
 
+app.submitResponse = function(body, res){
+	if(body.word){		
+		//Get entry with that word.
+		app.searchCollection.findOne({word:body.word}, function(err, search){
+			if(search){
+				console.log("found matching search");
+				if(body.auth){
+					app.searchCollection.update({_id: search._id},{ $push: { comments: body.response } }, emptyCallback);				
+				} else{
+					app.searchCollection.update({_id: search._id},{ $push: { pendingComments: body.response } }, emptyCallback);				
+				}
+				res.send({status:'success'});
+			} else{
+				console.log("No matching search");
+				res.send({status:'fail'});
+			}
+		});
+	} else{
+		console.error("Missing word");
+		res.send({status:'fail'});
+	}
+
+};
+
+app.updateTweets = function(){
+	// TODO: run searches if oldest is too old.
+	//app.runSearches();
+
+
+	// delete old ones
+	Tweets.cleanup();
+};
+
 
 //Dev test on start:
 app.test = function(){
 	// Delete current collection.
-	app.searchCollection.drop() ;
-	app.setEntry();
+	// LOSES submitted comments 
+	//app.searchCollection.drop() ;
 
-	app.runSearches();
+
+	app.setEntry();
+	//app.runSearches();
 };
 
+Tweets.cleanup = function(){
+	console.log('cleanup');
+	var tooOld =  new Date();
+	tooOld.setDate(tooOld.getDate() - 1);
+
+	var filter = {
+		'badTweet.created_at':{$lt:tooOld},
+		status:"pending"
+	};
+	//TODO: if tweets are pending and older than tooOld, remove them.
+	app.tweetCollection.remove(filter, function(err, numRemoved) {
+		console.log('tweets removed', numRemoved);
+    });
+}
 
 app.runSearches = function(){
 	app.searchCollection.find().toArray(function(err, items) {
 		console.log('searches: '+ items.length);
 		items.forEach(function(val, key){
-			console.log('values',val,key);
+			//console.log('values',val,key);
 			app.runSingleSearch(val);	
 		});
     });
@@ -92,11 +150,13 @@ app.runSingleSearch = function(search){
 			  console.log('got bad tweets: ', badTweets.length);
 
 			  for(var i = 0; i < badTweets.length; i++){
-			  	console.log('badTweets[i]',badTweets[i]);
 			  	(function(i){
-			  	app.tweetCollection.findOne({"badTweets.id_str": badTweets[i].id_str}, function(err, checkQueue ){
+			  	app.tweetCollection.findOne({"badTweet.id_str": badTweets[i].id_str}, function(err, checkQueue ){
 				  	// Make sure not a duplicate and not a Retweet
 			  		if(!checkQueue && !badTweets[i].retweeted_status){
+
+			  			// Set date to proper json style
+						badTweets[i].created_at = new Date(badTweets[i].created_at);
 
 			  			app.tweetCollection.insert(
 					  	{	
@@ -176,22 +236,21 @@ app.approveResponse = function(id){
 	console.log("Approving response ",id);
 	app.tweetCollection.findOne({_id: id}, function(err, entry){
 		if(entry){
-			console.log('entry ',entry);
 			var userName = entry.badTweet.user.screen_name;
 			var statusUpdate = app.prepareResponse(userName, entry.response);
 
 			console.log("TODO: Uncomment to send ", statusUpdate);
 			// TODO figure out how to 'reply' to a tweet.
 			
-			app.T.post('statuses/update', { status: statusUpdate }, function(err, data, response) {
-			   console.log('err ',err);
-			   console.log('post ',data);
-			});	
+			// app.T.post('statuses/update', { status: statusUpdate }, function(err, data, response) {
+			//    console.log('err ',err);
+			//    console.log('post ',data);
+			// });	
 
 
 			app.tweetCollection.update({_id: id}, 
 			{
-				$set: {response: "approved"}
+				$set: {status: "approved"}
 			}, emptyCallback);	
 		} else{
 			console.warn("Entry not found " + id);
@@ -205,7 +264,7 @@ app.rejectResponse = function(id){
 
 	app.tweetCollection.update({_id: id}, 
 	{
-		$set: {response: "rejected"}
+		$set: {status: "rejected"}
 	}, emptyCallback);
 	
 };
@@ -213,30 +272,55 @@ app.rejectResponse = function(id){
 //Set new entries:
 app.setEntry = function(){
 
-	// !name will be replaced with users @tag / name
-	var searchObj = [
+	// !name will be replaced with user's @twitterhandle
+	var searchAry = [
 	{
 		word:'gay', //duplicate of key, just so we have it easily accesible
 		cleanWord: 'gay', //Gay is not always a bad word. Use cleanVersion for words like f*g
-		emails: ['sample1@gmail.com', 'sample2@gmail.com'],
+		emails: [],
 		emailIndex: 0,
-		comments:['Dakens first magical tweet',
-					'Some other tweet',
-					'A third kind of tweet']
+		comments:["Pastor's speech against gay rights, with surprise ending. https://www.youtube.com/watch?v=VLEGTuXTDoI",
+					"Sweet message from a bunch of famous athletes !name #ProudToPlay https://www.youtube.com/watch?v=S14QJcI4KNs&feature=inp-tw-paq-5002"],
+		pendingComments:[]
 	},
 	{
 		word:'redskins',
 		cleanWord: 'r*dskins', 
-		emails: ['sample1@gmail.com', 'sample2@gmail.com'],
+		emails: [],
 		emailIndex: 0,
 		comments:['R*dskin: noun, dated, offensive. #Google #Definition #ChangeTheName https://www.google.com/search?q=redskin+definition',
 					'Hey !name R*dskins name is only offensive if you think about it http://www.theonion.com/articles/report-redskins-name-only-offensive-if-you-think-a,33449/',
-					'Support the team, not the name. http://youtu.be/mR-tbOxlhvE']
-	}
+					'Support the team, not the name. http://youtu.be/mR-tbOxlhvE',
+					'Great team, racist name. #SupportTheTeamNotTheName'],
+		pendingComments:[]
+	},
+	{
+		word:'retarded',
+		cleanWord: 'r*t*rd*d', 
+		emails: [],
+		emailIndex: 0,
+		comments:['Open letter from special olympic athlete to !name http://specialolympicsblog.wordpress.com/2012/10/23/an-open-letter-to-ann-coulter/'],
+		pendingComments:[]
+	},	
 	];
 
-	// Add new searches
-	app.searchCollection.insert( searchObj, {safe: true}, emptyCallback);
+	app.smartInsert(searchAry);
+};
+
+// Inserts only if an entry with that word doesn't exist
+app.smartInsert = function(searchAry){
+	searchAry.forEach(function(val, key){
+		// Add new searches
+		app.searchCollection.findOne( {word: val.word }, {safe: true}, function(err, entry){
+			if(!entry){
+				console.log("Insert " + val.word);
+				app.searchCollection.insert( val, {safe: true}, emptyCallback);
+			} else{
+				console.log("Duplicate " + val.word);
+			}
+		});
+		
+	});
 };
 
 app.randomComment = function(val){
