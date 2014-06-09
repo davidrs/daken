@@ -136,6 +136,7 @@ var app = {
 	},
 
 	getQueue: function(word){
+		ga('send', 'event', 'buttonDaken', 'click', word);
 		var filter = {word: word};
 		if(! User.auth){
 			// Decided to show unnapproved to everyone. Allows for guests to reply directly themselves.
