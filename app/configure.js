@@ -11,7 +11,7 @@ module.exports = function (app) {
 		    consumer_key:         'GsaQ0j9nLg2uImZhjEj7KmWCu',
 		  	consumer_secret:      'b2QFKJjsSVaIp6CarFy2gk6WXC7DXd9xHRqaiF4LKKz4ELztSQ',
 		 	access_token:         '2528590494-aAKpuyEdEcGKyLXghfEgeGLNO96TStBk7Qmte82',
-		 	access_token_secret:  'ehuek6S2wbjJh3YM1TFcVTDDXOTZhOlS1XhZI9rX94TJG'
+		 	access_token_secret:  'dECVYon2XovK0o5y89EuZn97ZCQtfmgyW6ExMUkGtLxQ4'
 		});
 	};	
 };
