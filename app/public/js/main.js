@@ -16,6 +16,7 @@ requirejs.config({
 var app = {
 	start: function(){
 		app.loadSettings();
+		app.createRoutes();
 
 		$.getJSON(BASE_API_URL + '/search',function(data){
 			console.log('search',data);
@@ -127,12 +128,16 @@ var app = {
 
 				// Go back, hide queue, show searches
 				$('a.back').click(function(evt){
-					$('#intro').show();
-					$('#search-container').hide();
-					$('#queue').hide();
-					$('#searches').show();
+					app.goHome();
 				});
 			});
+	},
+
+	goHome: function(){
+		$('#intro').show();
+		$('#search-container').hide();
+		$('#queue').hide();
+		$('#searches').show();
 	},
 
 	getQueue: function(word){
@@ -165,15 +170,18 @@ var app = {
 			for(var counter = 0; counter < queue.length; counter++){
 
 				entry = queue[counter];
-				entry.id = entry._id;
-				entry.auth = User.auth;
-				row.append(_.template(template, entry));
+				// Don't bother rendering rejected / ingored ones
+				if(entry.status != 'rejected'){
+					entry.id = entry._id;
+					entry.auth = User.auth;
+					row.append(_.template(template, entry));
 
-				// Add new row div if needed.
-				if((counter + 1) % 3 === 0){
-					$('#queue').append(row);
-					$('#queue').append('<hr />');
-					row = $('<div class="row"></div>');		
+					// Add new row div if needed.
+					if((counter + 1) % 3 === 0){
+						$('#queue').append(row);
+						$('#queue').append('<hr />');
+						row = $('<div class="row"></div>');		
+					}
 				}
 			}
 
@@ -226,6 +234,20 @@ var app = {
 				console.log('ran searches',data);
 			});
 		}
+	},
+
+	createRoutes: function(){
+		var self = this;
+		Finch.route(':word', function(res){
+			if(res.word){
+				console.log('word',res.word);
+			} else {
+				app.goHome();
+			}
+		});
+
+		Finch.listen();
+
 	}
 };
 

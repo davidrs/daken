@@ -4,14 +4,16 @@
   <p><strong>Response:</strong> <%= response %></p>
   <a href="http://twitter.com/<%=badTweet.user.id_str %>/status/<%=badTweet.id_str%>" target="_blank" class="btn btn-sm btn-info" >Original Tweet</a>
 
-  <% if(status == "approved" && auth){ %>
-    <a class="label label-success" href="#" role="button" data-id="<%= _id %>">Response Sent</a>
+  <% if(status == "approved"){ %>
+    <div class="label label-success">Response Sent</div>
   <% } else if(status == "pending" && auth){ %>
     <div class="pending-actions">
   	  <a class="btn btn-sm btn-success approve"  role="button" data-id="<%= _id %>">Send Reply</a>
   	  <a class="btn btn-sm btn-danger reject" role="button" data-id="<%= _id %>">Ignore</a>
     </div>
-  <% } else if (status == "rejected"){ %>
-  	 <a class="label label-danger" href="#" role="button" data-id="<%= _id %>">Ignored</a>
+  <% } else if(status == "pending" && !auth){ %>
+    <div class="pending-actions">
+    <div class="label label-info">Pending Admin Review</div>
+    </div>    
   <% } %>
 </div>
