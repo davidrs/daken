@@ -16,6 +16,7 @@ requirejs.config({
 var app = {
 	start: function(){
 		app.loadSettings();
+		app.createRoutes();
 
 		$.getJSON(BASE_API_URL + '/search',function(data){
 			console.log('search',data);
@@ -127,15 +128,20 @@ var app = {
 
 				// Go back, hide queue, show searches
 				$('a.back').click(function(evt){
-					$('#intro').show();
-					$('#search-container').hide();
-					$('#queue').hide();
-					$('#searches').show();
+					app.goHome();
 				});
 			});
 	},
 
+	goHome: function(){
+		$('#intro').show();
+		$('#search-container').hide();
+		$('#queue').hide();
+		$('#searches').show();
+	},
+
 	getQueue: function(word){
+		ga('send', 'event', 'buttonDaken', 'click', word);
 		var filter = {word: word};
 		if(! User.auth){
 			// Decided to show unnapproved to everyone. Allows for guests to reply directly themselves.
@@ -164,15 +170,18 @@ var app = {
 			for(var counter = 0; counter < queue.length; counter++){
 
 				entry = queue[counter];
-				entry.id = entry._id;
-				entry.auth = User.auth;
-				row.append(_.template(template, entry));
+				// Don't bother rendering rejected / ingored ones
+				if(entry.status != 'rejected'){
+					entry.id = entry._id;
+					entry.auth = User.auth;
+					row.append(_.template(template, entry));
 
-				// Add new row div if needed.
-				if((counter + 1) % 3 === 0){
-					$('#queue').append(row);
-					$('#queue').append('<hr />');
-					row = $('<div class="row"></div>');		
+					// Add new row div if needed.
+					if((counter + 1) % 3 === 0){
+						$('#queue').append(row);
+						$('#queue').append('<hr />');
+						row = $('<div class="row"></div>');		
+					}
 				}
 			}
 
@@ -192,12 +201,14 @@ var app = {
 		$('.approve').click(function(evt){
 			var id = $(this).data('id');
 			var parentBox = $(this).closest('.col-md-4');
-			$.getJSON(BASE_API_URL + '/queue/'+ id +"/approve",function(data){
-				console.log('approved ',data);
-				console.log(parentBox.find('.pending-actions').length);
-				parentBox.find('.pending-actions').hide();
-				parentBox.addClass("bg-success");
-			});
+			if(User.auth){
+				$.getJSON(BASE_API_URL + '/queue/'+ id +"/approve",function(data){
+					console.log('approved ',data);
+					console.log(parentBox.find('.pending-actions').length);
+					parentBox.find('.pending-actions').hide();
+					parentBox.addClass("bg-success");
+				});
+			}
 			evt.preventDefault();
 		});
 
@@ -205,11 +216,13 @@ var app = {
 			var id = $(this).data('id');
 			console.log('click ',id);
 			var parentBox = $(this).closest('.col-md-4');
-			$.get(BASE_API_URL + '/queue/'+ id +"/reject", function(data){
-				console.log('rejected ',data);
-				console.log(parentBox);
-				parentBox.fadeOut(600, function() { $(this).remove(); });
-			});
+			if(User.auth){
+				$.get(BASE_API_URL + '/queue/'+ id +"/reject", function(data){
+					console.log('rejected ',data);
+					console.log(parentBox);
+					parentBox.fadeOut(600, function() { $(this).remove(); });
+				});
+			}
 			evt.preventDefault();
 		});
 	},
@@ -221,6 +234,20 @@ var app = {
 				console.log('ran searches',data);
 			});
 		}
+	},
+
+	createRoutes: function(){
+		var self = this;
+		Finch.route(':word', function(res){
+			if(res.word){
+				console.log('word',res.word);
+			} else {
+				app.goHome();
+			}
+		});
+
+		Finch.listen();
+
 	}
 };
 

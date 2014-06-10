@@ -88,12 +88,14 @@ app.submitResponse = function(body, res){
 };
 
 app.updateTweets = function(){
-	// TODO: run searches if oldest is too old.
-	//app.runSearches();
-
-
 	// delete old ones
-	Tweets.cleanup();
+	Tweets.cleanup(function(){
+		app.tweetCollection.count(function(err, count) {
+	            if(count < 15){
+	            	app.runSearches();
+	            }
+	    });
+	});
 };
 
 
@@ -108,7 +110,7 @@ app.test = function(){
 	//app.runSearches();
 };
 
-Tweets.cleanup = function(){
+Tweets.cleanup = function(callback){
 	console.log('cleanup');
 	var tooOld =  new Date();
 	tooOld.setDate(tooOld.getDate() - 1);
@@ -120,17 +122,22 @@ Tweets.cleanup = function(){
 	//TODO: if tweets are pending and older than tooOld, remove them.
 	app.tweetCollection.remove(filter, function(err, numRemoved) {
 		console.log('tweets removed', numRemoved);
+		callback();
     });
 }
 
 app.runSearches = function(){
-	app.searchCollection.find().toArray(function(err, items) {
-		console.log('searches: '+ items.length);
-		items.forEach(function(val, key){
-			//console.log('values',val,key);
-			app.runSingleSearch(val);	
-		});
-    });
+	if(app.searchCollection){
+		app.searchCollection.find().toArray(function(err, items) {
+			console.log('searches: '+ items.length);
+			items.forEach(function(val, key){
+				//console.log('values',val,key);
+				app.runSingleSearch(val);	
+			});
+	    });
+	} else{
+		console.warn("searchCollection empty / null")
+	}
 };
 
 
@@ -239,13 +246,13 @@ app.approveResponse = function(id){
 			var userName = entry.badTweet.user.screen_name;
 			var statusUpdate = app.prepareResponse(userName, entry.response);
 
-			console.log("TODO: Uncomment to send ", statusUpdate);
+			//console.log("TODO: Uncomment to send ", statusUpdate);
 			// TODO figure out how to 'reply' to a tweet.
 			
-			// app.T.post('statuses/update', { status: statusUpdate }, function(err, data, response) {
-			//    console.log('err ',err);
-			//    console.log('post ',data);
-			// });	
+			app.T.post('statuses/update', { status: statusUpdate }, function(err, data, response) {
+			   console.log('err ',err);
+			   console.log('post ',data);
+			});	
 
 
 			app.tweetCollection.update({_id: id}, 

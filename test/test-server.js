@@ -5,7 +5,7 @@ var request = require('supertest');
 var BASE_API_URL = 'http://localhost:3000';
 var MIN_TWEETS = 5;
 var User = {email:'davidrustsmith@gmail.com', auth: false, password:''};
-var testTweet = {_id:'123test', word:'testword'};
+var testTweet = {_id:'5394cd290afcfd0200bbb3a7', word:'testword'};
 //--------------
 //Sample tests: https://github.com/vgheri/ShopWithMe/blob/master/test/Routes.js
 
